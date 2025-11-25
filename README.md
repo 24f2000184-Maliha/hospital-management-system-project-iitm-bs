@@ -43,15 +43,34 @@ python app.py
 ## Project Structure
 ```
 hospital-management/
+│
 ├── app.py
+├── hospital.db (auto-created)
+│
 ├── templates/
 │   ├── base.html
 │   ├── index.html
-│   └──
-├── static/
-│   └── css/
-│       └── style.css
-└── hospital.db
+│   ├── login.html
+│   ├── register.html
+│   ├── admin_dashboard.html
+│   ├── admin_doctors.html
+│   ├── admin_patients.html
+│   ├── admin_appointments.html
+│   ├── doctor_dashboard.html
+│   ├── doctor_appointments.html
+│   ├── doctor_availability.html
+│   ├── complete_appointment.html
+│   ├── patient_history.html
+│   ├── patient_dashboard.html
+│   ├── patient_doctors.html
+│   ├── book_appointment.html
+│   ├── patient_appointments.html
+│   ├── treatment_history.html
+│   └── patient_profile.html
+│
+└── static/
+    └── css/
+        └── style.css
 ```
 
 ## License
