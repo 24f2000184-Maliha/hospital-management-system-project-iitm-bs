@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Appointments{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-calendar-check"></i> All Appointments</h2>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment.id }}</td>
+                        <td>{{ appointment.patient.name }}</td>
+                        <td>{{ appointment.doctor.name }}</td>
+                        <td>{{ appointment.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ appointment.time.strftime('%H:%M') }}</td>
+                        <td>
+                            {% if appointment.status == 'Booked' %}
+                                <span class="badge bg-primary">{{ appointment.status }}</span>
+                            {% elif appointment.status == 'Completed' %}
+                                <span class="badge bg-success">{{ appointment.status }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ appointment.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ appointment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

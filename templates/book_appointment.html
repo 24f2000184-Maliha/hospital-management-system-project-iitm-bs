@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="bi bi-calendar-plus"></i> Book Appointment</h4>
+            </div>
+            <div class="card-body">
+                <!-- Doctor Info -->
+                <div class="alert alert-info">
+                    <h5>Dr. {{ doctor.name }}</h5>
+                    <p class="mb-0">
+                        <strong>Department:</strong> {{ doctor.department.name }}<br>
+                        <strong>Experience:</strong> {{ doctor.experience }} years
+                    </p>
+                </div>
+                
+                <!-- Booking Form -->
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Select Date *</label>
+                        <input type="date" class="form-control" name="date" 
+                               min="{{ today.strftime('%Y-%m-%d') }}" 
+                               max="{{ week_later.strftime('%Y-%m-%d') }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select Time *</label>
+                        <input type="time" class="form-control" name="time" required>
+                        <div class="form-text">Available times: 09:00 - 17:00</div>
+                    </div>
+                    
+                    {% if availabilities %}
+                    <div class="mb-3">
+                        <label class="form-label">Doctor's Available Slots</label>
+                        <div class="list-group">
+                            {% for avail in availabilities %}
+                            <div class="list-group-item">
+                                <strong>{{ avail.date.strftime('%Y-%m-%d') }}</strong>: 
+                                {{ avail.start_time.strftime('%H:%M') }} - {{ avail.end_time.strftime('%H:%M') }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-calendar-check"></i> Book Appointment
+                        </button>
+                        <a href="{{ url_for('patient_doctors') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

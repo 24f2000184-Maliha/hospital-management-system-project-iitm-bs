@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Find Doctors{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-search"></i> Find Doctors</h2>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('patient_doctors') }}">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="search" 
+                           placeholder="Search by doctor name..." 
+                           value="{{ request.args.get('search', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" name="department_id">
+                        <option value="">All Departments</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}" 
+                                    {% if request.args.get('department_id') == dept.id|string %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Doctors List -->
+<div class="row g-4">
+    {% for doctor in doctors %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-person-circle text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5>Dr. {{ doctor.name }}</h5>
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-hospital"></i> {{ doctor.department.name }}
+                        </p>
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-telephone"></i> {{ doctor.phone or 'N/A' }}
+                        </p>
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-envelope"></i> {{ doctor.email }}
+                        </p>
+                        <p class="mb-3">
+                            <i class="bi bi-award"></i> {{ doctor.experience }} years of experience
+                        </p>
+                        <a href="{{ url_for('book_appointment', doctor_id=doctor.id) }}" 
+                           class="btn btn-primary btn-sm">
+                            <i class="bi bi-calendar-plus"></i> Book Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

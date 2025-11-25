@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Appointment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="bi bi-check-circle"></i> Complete Appointment</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Patient:</strong> {{ appointment.patient.name }}<br>
+                    <strong>Date:</strong> {{ appointment.date.strftime('%Y-%m-%d') }}<br>
+                    <strong>Time:</strong> {{ appointment.time.strftime('%H:%M') }}
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Diagnosis *</label>
+                        <textarea class="form-control" name="diagnosis" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Prescription *</label>
+                        <textarea class="form-control" name="prescription" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Additional Notes</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Mark as Completed
+                        </button>
+                        <a href="{{ url_for('doctor_appointments') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

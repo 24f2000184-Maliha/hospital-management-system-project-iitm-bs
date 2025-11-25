@@ -1,0 +1,55 @@
+/* Make the page look nice */
+body {
+    background-color: #f5f5f5;
+}
+
+/* Make cards look better */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Make buttons look nicer */
+.btn {
+    border-radius: 5px;
+}
+
+/* Make tables look better */
+.table thead th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+/* Add some spacing to table rows */
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Make badges look nice */
+.badge {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+/* Make navbar logo bold */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Add some space around content */
+.content {
+    padding: 20px 0;
+}
+
+/* Make footer look nice */
+footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}

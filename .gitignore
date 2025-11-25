@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+venv/
+env/
+hospital.db
+*.db
+*.sqlite
+.DS_Store
+Thumbs.db
