@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Upcoming Appointments{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-calendar-event"></i> Upcoming Appointments</h2>
+        <p class="text-muted">Showing only future booked appointments</p>
+    </div>
+</div>
+
+<!-- Statistics Card -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5>Total Upcoming</h5>
+                <h2>{{ appointments|length }}</h2>
+                <small>Booked appointments from today onwards</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5>Today's Date</h5>
+                <h2>{{ today }}</h2>
+                <small>Current date</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Appointments Table -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-calendar-check"></i> Upcoming Appointments List</h4>
+    </div>
+    <div class="card-body">
+        {% if appointments %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Department</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Booked On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment.id }}</td>
+                        <td>
+                            <strong>{{ appointment.patient.name }}</strong><br>
+                            <small class="text-muted">{{ appointment.patient.email }}</small>
+                        </td>
+                        <td>
+                            <strong>Dr. {{ appointment.doctor.name }}</strong><br>
+                            <small class="text-muted">{{ appointment.doctor.phone }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ appointment.doctor.department.name }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ appointment.date.strftime('%Y-%m-%d') }}</strong><br>
+                            <small class="text-muted">{{ appointment.date.strftime('%A') }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ appointment.time.strftime('%H:%M') }}</strong><br>
+                            <small class="text-muted">{{ appointment.time.strftime('%I:%M %p') }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ appointment.status }}</span>
+                        </td>
+                        <td>{{ appointment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> No upcoming appointments found
+        </div>
+        <div class="text-center">
+            <a href="{{ url_for('admin_appointments') }}" class="btn btn-primary">
+                View All Appointments
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

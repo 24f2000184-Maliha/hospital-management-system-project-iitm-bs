@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 from functools import wraps
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '24f2000184'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hospital.db'
+app.config['SECRET_KEY'] = '@24f2000184'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hospital.db'  # SQLite database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -125,11 +125,12 @@ def index():
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/login/<role_type>', methods=['GET', 'POST'])
+def login(role_type=None):
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-        role = request.form.get('role')
+        role = request.form.get('role') or role_type
         
         if role == 'admin':
             user = Admin.query.filter_by(email=email).first()
@@ -166,7 +167,7 @@ def login():
         
         flash('Invalid credentials', 'danger')
     
-    return render_template('login.html')
+    return render_template('login.html', role_type=role_type)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -214,8 +215,11 @@ def admin_dashboard():
     total_doctors = Doctor.query.filter_by(is_active=True).count()
     total_patients = Patient.query.filter_by(is_active=True).count()
     total_appointments = Appointment.query.count()
+    
+    # Only count upcoming appointments (today and future dates with Booked status)
+    today = datetime.now().date()
     upcoming_appointments = Appointment.query.filter(
-        Appointment.date >= datetime.now().date(),
+        Appointment.date >= today,
         Appointment.status == 'Booked'
     ).count()
     
@@ -277,8 +281,15 @@ def edit_doctor(id):
     doctor.department_id = request.form.get('department_id')
     doctor.experience = request.form.get('experience')
     
+    # Update password only if provided
+    new_password = request.form.get('password')
+    if new_password and new_password.strip():
+        doctor.password = generate_password_hash(new_password)
+        flash('Doctor information and password updated successfully', 'success')
+    else:
+        flash('Doctor information updated successfully', 'success')
+    
     db.session.commit()
-    flash('Doctor updated successfully', 'success')
     return redirect(url_for('admin_doctors'))
 
 @app.route('/admin/delete_doctor/<int:id>')
@@ -317,8 +328,51 @@ def delete_patient(id):
 @app.route('/admin/appointments')
 @login_required('admin')
 def admin_appointments():
-    appointments = Appointment.query.order_by(Appointment.date.desc(), Appointment.time.desc()).all()
+    filter_type = request.args.get('filter', 'all')
+    today = datetime.now().date()
+    
+    print(f"DEBUG: Today's date is: {today}")
+    print(f"DEBUG: Filter type: {filter_type}")
+    
+    if filter_type == 'upcoming':
+        appointments = Appointment.query.filter(
+            Appointment.date >= today,
+            Appointment.status == 'Booked'
+        ).order_by(Appointment.date.asc(), Appointment.time.asc()).all()
+        
+        print(f"DEBUG: Found {len(appointments)} upcoming appointments")
+        for apt in appointments:
+            print(f"  - ID: {apt.id}, Date: {apt.date}, Status: {apt.status}")
+            
+    elif filter_type == 'completed':
+        appointments = Appointment.query.filter_by(status='Completed').order_by(
+            Appointment.date.desc(), Appointment.time.desc()
+        ).all()
+    elif filter_type == 'cancelled':
+        appointments = Appointment.query.filter_by(status='Cancelled').order_by(
+            Appointment.date.desc(), Appointment.time.desc()
+        ).all()
+    else:  # all
+        appointments = Appointment.query.order_by(
+            Appointment.date.desc(), Appointment.time.desc()
+        ).all()
+    
     return render_template('admin_appointments.html', appointments=appointments)
+
+@app.route('/admin/upcoming_appointments')
+@login_required('admin')
+def admin_upcoming_appointments():
+    today = datetime.now().date()
+    
+    # Get only future appointments with Booked status
+    appointments = Appointment.query.filter(
+        Appointment.date >= today,
+        Appointment.status == 'Booked'
+    ).order_by(Appointment.date.asc(), Appointment.time.asc()).all()
+    
+    return render_template('admin_upcoming_appointments.html', 
+                         appointments=appointments, 
+                         today=today)    
 
 # ===================== DOCTOR ROUTES =====================
 
@@ -329,18 +383,23 @@ def doctor_dashboard():
     today = datetime.now().date()
     week_later = today + timedelta(days=7)
     
+    # Get upcoming appointments for next 7 days
     upcoming_appointments = Appointment.query.filter(
         Appointment.doctor_id == doctor_id,
         Appointment.date.between(today, week_later),
         Appointment.status == 'Booked'
     ).order_by(Appointment.date, Appointment.time).all()
     
-    total_patients = db.session.query(Patient).join(Appointment).filter(
+    # Get list of unique patients assigned to this doctor
+    patients = db.session.query(Patient).join(Appointment).filter(
         Appointment.doctor_id == doctor_id
-    ).distinct().count()
+    ).distinct().all()
+    
+    total_patients = len(patients)
     
     return render_template('doctor_dashboard.html',
                          appointments=upcoming_appointments,
+                         patients=patients,
                          total_patients=total_patients)
 
 @app.route('/doctor/availability', methods=['GET', 'POST'])
@@ -436,6 +495,22 @@ def patient_history(patient_id):
     
     return render_template('patient_history.html', patient=patient, appointments=appointments)
 
+@app.route('/doctor/cancel_appointment/<int:id>')
+@login_required('doctor')
+def cancel_appointment_doctor(id):
+    appointment = Appointment.query.get_or_404(id)
+    
+    # Check if appointment belongs to this doctor
+    if appointment.doctor_id != session['user_id']:
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('doctor_dashboard'))
+    
+    appointment.status = 'Cancelled'
+    db.session.commit()
+    
+    flash('Appointment cancelled successfully', 'success')
+    return redirect(url_for('doctor_dashboard'))
+
 # ===================== PATIENT ROUTES =====================
 
 @app.route('/patient/dashboard')
@@ -493,6 +568,7 @@ def book_appointment(doctor_id):
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
         time = datetime.strptime(time_str, '%H:%M').time()
         
+        # Check if appointment already exists
         existing = Appointment.query.filter_by(
             doctor_id=doctor_id,
             date=date,
@@ -516,17 +592,16 @@ def book_appointment(doctor_id):
         flash('Appointment booked successfully', 'success')
         return redirect(url_for('patient_dashboard'))
     
+    # Get doctor's availability
     today = datetime.now().date()
     week_later = today + timedelta(days=7)
-    
     availabilities = DoctorAvailability.query.filter(
         DoctorAvailability.doctor_id == doctor_id,
         DoctorAvailability.date.between(today, week_later),
         DoctorAvailability.is_available == True
     ).all()
     
-    return render_template('book_appointment.html', doctor=doctor, availabilities=availabilities, today=today, week_later=week_later)
-
+    return render_template('book_appointment.html', doctor=doctor, availabilities=availabilities)
 
 @app.route('/patient/cancel_appointment/<int:id>')
 @login_required('patient')
@@ -586,4 +661,4 @@ def patient_profile():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)  
+    app.run(debug=True)
