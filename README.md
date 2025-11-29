@@ -11,14 +11,14 @@ A complete hospital management system built with Flask, SQLite, and Bootstrap.
 ## Technologies Used
 
 - **Backend**: Flask, SQLAlchemy
-- **Frontend**: HTML, CSS, Bootstrap 5, Jinja2
+- **Frontend**: HTML, CSS, Bootstrap , Jinja2
 - **Database**: SQLite
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/24f2000184-Maliha/hospital-management-system.git
+git clone https://github.com/24f2000184/hospital-management-system-project-iitm-bs
 cd hospital-management-system
 ```
 
